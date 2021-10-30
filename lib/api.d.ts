@@ -18,6 +18,7 @@ export declare class OpenSeaAPI {
      */
     logger: (arg: string) => void;
     private apiKey;
+    private makePostRequest?;
     /**
      * Create an instance of the OpenSea API
      * @param config OpenSeaAPIConfig for setting up the API, including an optional API key, network name, and base URL
@@ -31,6 +32,7 @@ export declare class OpenSeaAPI {
      * @param order Order JSON to post to the orderbook
      * @param retries Number of times to retry if the service is unavailable for any reason
      */
+    postOrderOld(order: OrderJSON, retries?: number): Promise<Order>;
     postOrder(order: OrderJSON, retries?: number): Promise<Order>;
     /**
      * Create a whitelist entry for an asset to prevent others from buying.
