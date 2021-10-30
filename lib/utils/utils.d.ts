@@ -1,8 +1,8 @@
-import BigNumber from 'bignumber.js';
-import { WyvernProtocol } from 'wyvern-js';
-import * as Web3 from 'web3';
-import { AnnotatedFunctionABI, Schema } from 'wyvern-schemas/dist/types';
-import { Asset, AssetEvent, ECSignature, OpenSeaAccount, OpenSeaAsset, OpenSeaAssetBundle, OpenSeaAssetContract, OpenSeaCollection, OpenSeaFungibleToken, OpenSeaUser, Order, OrderJSON, Transaction, UnhashedOrder, UnsignedOrder, Web3Callback, WyvernAsset, WyvernBundle, WyvernFTAsset, WyvernNFTAsset } from '../types';
+import BigNumber from "bignumber.js";
+import { WyvernProtocol } from "wyvern-js";
+import * as Web3 from "web3";
+import { AnnotatedFunctionABI, Schema } from "wyvern-schemas/dist/types";
+import { Asset, AssetEvent, ECSignature, OpenSeaAccount, OpenSeaAsset, OpenSeaAssetBundle, OpenSeaAssetContract, OpenSeaCollection, OpenSeaFungibleToken, OpenSeaUser, Order, OrderJSON, Transaction, UnhashedOrder, UnsignedOrder, Web3Callback, WyvernAsset, WyvernBundle, WyvernFTAsset, WyvernNFTAsset } from "../types";
 export { WyvernProtocol };
 export declare const annotateERC721TransferABI: (asset: WyvernNFTAsset) => AnnotatedFunctionABI;
 export declare const annotateERC20TransferABI: (asset: WyvernFTAsset) => AnnotatedFunctionABI;
@@ -93,7 +93,7 @@ export declare function getCurrentGasPrice(web3: Web3): Promise<BigNumber>;
  * @param web3 Web3 instance
  * @param asset The asset to check for transfer fees
  */
-export declare function getTransferFeeSettings(web3: Web3, { asset, accountAddress }: {
+export declare function getTransferFeeSettings(web3: Web3, { asset, accountAddress, }: {
     asset: Asset;
     accountAddress?: string;
 }): Promise<{
@@ -107,7 +107,7 @@ export declare function getTransferFeeSettings(web3: Web3, { asset, accountAddre
  *  to fix race conditions
  * @param shouldRoundUp Whether to round up fractional wei
  */
-export declare function estimateCurrentPrice(order: Order, secondsToBacktrack?: number, shouldRoundUp?: boolean): BigNumber;
+export declare function estimateCurrentPrice(order: Order, secondsToBacktrack?: number, shouldRoundUp?: boolean): import("@0xproject/utils").BigNumber;
 /**
  * Get the Wyvern representation of a fungible asset
  * @param schema The WyvernSchema needed to access this asset

@@ -2,7 +2,7 @@ import { BigNumber } from "bignumber.js";
 import { isValidAddress } from "ethereumjs-util";
 import { EventEmitter, EventSubscription } from "fbemitter";
 import * as _ from "lodash";
-import * as Web3 from "web3";
+import Web3 from "web3";
 import { WyvernProtocol } from "wyvern-js";
 import * as WyvernSchemas from "wyvern-schemas";
 import { Schema } from "wyvern-schemas/dist/types";
@@ -500,17 +500,17 @@ export class OpenSeaPort {
     contractAddress: string;
   }) {
     // Get UniswapExchange for WrappedNFTContract for contractAddress
-    const wrappedNFTFactoryContract = this.web3.eth.contract(
-      WrappedNFTFactory as any[]
+    const wrappedNFTFactoryContract = new this.web3.eth.Contract(
+      WrappedNFTFactory
     );
     const wrappedNFTFactory = await wrappedNFTFactoryContract.at(
       this._wrappedNFTFactoryAddress
     );
     const wrappedNFTAddress =
       await wrappedNFTFactory.nftContractToWrapperContract(contractAddress);
-    const wrappedNFTContract = this.web3.eth.contract(WrappedNFT as any[]);
+    const wrappedNFTContract = new this.web3.eth.Contract(WrappedNFT as any[]);
     const wrappedNFT = await wrappedNFTContract.at(wrappedNFTAddress);
-    const uniswapFactoryContract = this.web3.eth.contract(
+    const uniswapFactoryContract = new this.web3.eth.Contract(
       UniswapFactory as any[]
     );
     const uniswapFactory = await uniswapFactoryContract.at(
@@ -519,7 +519,7 @@ export class OpenSeaPort {
     const uniswapExchangeAddress = await uniswapFactory.getExchange(
       wrappedNFTAddress
     );
-    const uniswapExchangeContract = this.web3.eth.contract(
+    const uniswapExchangeContract = new this.web3.eth.Contract(
       UniswapExchange as any[]
     );
     const uniswapExchange = await uniswapExchangeContract.at(
@@ -1268,7 +1268,7 @@ export class OpenSeaPort {
     schemaName?: WyvernSchemaName;
   }): Promise<string | null> {
     const schema = this._getSchema(schemaName);
-    const tokenContract = this.web3.eth.contract(tokenAbi as any[]);
+    const tokenContract = new this.web3.eth.Contract(tokenAbi as any[]);
     const contract = await tokenContract.at(tokenAddress);
 
     if (!proxyAddress) {
@@ -1453,7 +1453,7 @@ export class OpenSeaPort {
       proxyAddress,
     });
 
-    if (approvedAmount.greaterThanOrEqualTo(minimumAmount)) {
+    if (approvedAmount.isGreaterThanOrEqualTo(minimumAmount)) {
       this.logger("Already approved enough currency for trading");
       return null;
     }
@@ -1508,7 +1508,7 @@ export class OpenSeaPort {
           tokenAddress,
           proxyAddress,
         });
-        return newlyApprovedAmount.greaterThanOrEqualTo(minimumAmount);
+        return newlyapprovedAmount.isGreaterThanOrEqualTo(minimumAmount);
       }
     );
     return txHash;
@@ -1948,7 +1948,7 @@ export class OpenSeaPort {
 
       const abi = schema.functions.countOf(wyAsset);
       const contract = this._getClientsForRead(retries)
-        .web3.eth.contract([abi as Web3.FunctionAbi])
+        .web3.eth.Contract([abi as Web3.FunctionAbi])
         .at(abi.target);
       const inputValues = abi.inputs
         .filter((x) => x.value !== undefined)
@@ -1965,7 +1965,7 @@ export class OpenSeaPort {
 
       const abi = schema.functions.ownerOf(wyAsset);
       const contract = this._getClientsForRead(retries)
-        .web3.eth.contract([abi as Web3.FunctionAbi])
+        .web3.eth.Contract([abi as Web3.FunctionAbi])
         .at(abi.target);
       if (abi.inputs.filter((x) => x.value === undefined)[0]) {
         throw new Error(
@@ -2736,7 +2736,7 @@ export class OpenSeaPort {
       const cheezeWizardsBasicTournamentAddress = isMainnet
         ? CHEEZE_WIZARDS_BASIC_TOURNAMENT_ADDRESS
         : CHEEZE_WIZARDS_BASIC_TOURNAMENT_RINKEBY_ADDRESS;
-      const cheezeWizardsBasicTournamentABI = this.web3.eth.contract(
+      const cheezeWizardsBasicTournamentABI = new this.web3.eth.Contract(
         CheezeWizardsBasicTournament as any[]
       );
       const cheezeWizardsBasicTournmentInstance =
@@ -2765,7 +2765,7 @@ export class OpenSeaPort {
       // We stated that we will only use Decentraland estates static
       // calls on mainnet, since Decentraland uses Ropsten
       const decentralandEstateAddress = DECENTRALAND_ESTATE_ADDRESS;
-      const decentralandEstateABI = this.web3.eth.contract(
+      const decentralandEstateABI = new this.web3.eth.Contract(
         DecentralandEstates as any[]
       );
       const decentralandEstateInstance = await decentralandEstateABI.at(
