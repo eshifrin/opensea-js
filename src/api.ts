@@ -49,7 +49,8 @@ export class OpenSeaAPI {
    */
   public logger: (arg: string) => void;
 
-  private apiKey: string | undefined;
+  private apiKey: string | (() => string) | undefined;
+  private makePostRequest?;
 
   /**
    * Create an instance of the OpenSea API
@@ -58,6 +59,9 @@ export class OpenSeaAPI {
    */
   constructor(config: OpenSeaAPIConfig, logger?: (arg: string) => void) {
     this.apiKey = config.apiKey;
+    if (config.makePostRequest) {
+      this.makePostRequest = config.makePostRequest;
+    }
 
     switch (config.networkName) {
       case Network.Rinkeby:
@@ -82,19 +86,21 @@ export class OpenSeaAPI {
    * @param order Order JSON to post to the orderbook
    * @param retries Number of times to retry if the service is unavailable for any reason
    */
-  public async postOrder(order: OrderJSON, retries = 2): Promise<Order> {
+  public async postOrder(order: OrderJSON): Promise<Order> {
+    if (!this.makePostRequest) {
+      throw new Error("didn't pass a makePostRequest function");
+    }
+
     let json;
     try {
-      json = (await this.post(
-        `${ORDERBOOK_PATH}/orders/post/`,
+      json = await this.makePostRequest<Order>(
+        `https://api.opensea.io/wyvern/v1/orders/post/`,
         order
-      )) as OrderJSON;
+      );
     } catch (error) {
-      _throwOrContinue(error, retries);
-      await delay(3000);
-      return this.postOrder(order, retries - 1);
+      throw error;
     }
-    return orderFromJSON(json);
+    return json.data;
   }
 
   /**
@@ -363,7 +369,8 @@ export class OpenSeaAPI {
    */
   private async _fetch(apiPath: string, opts: RequestInit = {}) {
     const apiBase = this.apiBaseUrl;
-    const apiKey = this.apiKey;
+    const apiKey =
+      typeof this.apiKey === "function" ? this.apiKey() : this.apiKey;
     const finalUrl = apiBase + apiPath;
     const finalOpts = {
       ...opts,

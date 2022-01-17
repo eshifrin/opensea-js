@@ -8,6 +8,7 @@ import {
   Order as WyvernOrder,
 } from "wyvern-js/lib/types";
 import type { Token } from "wyvern-schemas/dist/types";
+import { AxiosResponse } from "axios";
 
 export { HowToCall, Network };
 export type { ECSignature };
@@ -93,11 +94,15 @@ export interface EventData {
  */
 export interface OpenSeaAPIConfig {
   networkName?: Network;
-  apiKey?: string;
+  apiKey?: string | undefined | (() => string);
   apiBaseUrl?: string;
   useReadOnlyProvider?: boolean;
   // Sent to WyvernJS
   gasPrice?: BigNumber;
+  makePostRequest?: <T>(
+    path: string,
+    data: object
+  ) => Promise<AxiosResponse<T>>;
 }
 
 /**
