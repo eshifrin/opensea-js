@@ -1,3 +1,5 @@
+// @ts-
+
 import "isomorphic-unfetch";
 import * as QueryString from "query-string";
 import {
@@ -50,7 +52,7 @@ export class OpenSeaAPI {
    */
   public logger: (arg: string) => void;
 
-  private apiKey: string | undefined;
+  private apiKey: string | undefined | (() => string);
 
   private makePostRequest?: <T>(
     path: string,
@@ -99,6 +101,7 @@ export class OpenSeaAPI {
         order
       )) as OrderJSON;
     } catch (error) {
+      // @ts-ignore
       _throwOrContinue(error, retries);
       await delay(3000);
       return this.postOrderOld(order, retries - 1);
@@ -228,6 +231,7 @@ export class OpenSeaAPI {
         `${API_PATH}/asset/${tokenAddress}/${tokenId || 0}/`
       );
     } catch (error) {
+      // @ts-ignore
       _throwOrContinue(error, retries);
       await delay(1000);
       return this.getAsset({ tokenAddress, tokenId }, retries - 1);
@@ -278,6 +282,7 @@ export class OpenSeaAPI {
         offset: (page - 1) * this.pageSize,
       });
     } catch (error) {
+      // @ts-ignore
       _throwOrContinue(error, retries);
       await delay(1000);
       return this.getPaymentTokens(query, page, retries - 1);
@@ -384,7 +389,8 @@ export class OpenSeaAPI {
    */
   private async _fetch(apiPath: string, opts: RequestInit = {}) {
     const apiBase = this.apiBaseUrl;
-    const apiKey = this.apiKey;
+    const apiKey =
+      typeof this.apiKey === "function" ? this.apiKey() : this.apiKey;
     const finalUrl = apiBase + apiPath;
     const finalOpts = {
       ...opts,

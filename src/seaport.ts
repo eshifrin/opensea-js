@@ -3229,6 +3229,7 @@ export class OpenSeaPort {
     } catch (error) {
       if (retries <= 0) {
         throw new Error(
+          // @ts-ignore
           `Error matching this listing: ${error.message}. Please contact the maker or try again later!`
         );
       }
@@ -4054,6 +4055,7 @@ export class OpenSeaPort {
     } catch (error) {
       console.error(`Failed atomic match with args: `, args, error);
       throw new Error(
+        // @ts-ignore
         `Oops, the Ethereum network rejected this transaction :( The OpenSea devs have been alerted, but this problem is typically due an item being locked or untransferrable. The exact error was "${error.message.substr(
           0,
           MAX_ERROR_LENGTH
@@ -4083,6 +4085,7 @@ export class OpenSeaPort {
       console.error(error);
 
       this._dispatch(EventType.TransactionDenied, {
+        // @ts-ignore
         error,
         buy,
         sell,
@@ -4092,6 +4095,7 @@ export class OpenSeaPort {
 
       throw new Error(
         `Failed to authorize transaction: "${
+          // @ts-ignore
           error.message ? error.message : "user denied"
         }..."`
       );
@@ -4224,6 +4228,7 @@ export class OpenSeaPort {
       this.logger(`Transaction failed: ${description}`);
       this._dispatch(EventType.TransactionFailed, {
         ...transactionEventData,
+        // @ts-ignore
         error,
       });
       throw error;
