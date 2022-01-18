@@ -75,6 +75,7 @@ export interface OpenSeaAPIConfig {
     apiBaseUrl?: string;
     gasPrice?: BigNumber;
     makePostRequest?: <T>(path: string, data: object) => Promise<AxiosResponse<T>>;
+    makeGetRequest?: <T>(path: string) => Promise<AxiosResponse<T>>;
 }
 /**
  * Wyvern order side: buy or sell.
