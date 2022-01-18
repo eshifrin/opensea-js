@@ -59,6 +59,8 @@ export class OpenSeaAPI {
     data: object
   ) => Promise<AxiosResponse<T>>;
 
+  private makeGetRequest?: <T>(path: string) => Promise<AxiosResponse<T>>;
+
   /**
    * Create an instance of the OpenSea API
    * @param config OpenSeaAPIConfig for setting up the API, including an optional API key, network name, and base URL
@@ -68,6 +70,10 @@ export class OpenSeaAPI {
     this.apiKey = config.apiKey;
     if (config.makePostRequest) {
       this.makePostRequest = config.makePostRequest;
+    }
+
+    if (config.makeGetRequest) {
+      this.makeGetRequest = config.makeGetRequest;
     }
 
     switch (config.networkName) {
@@ -225,10 +231,15 @@ export class OpenSeaAPI {
     },
     retries = 1
   ): Promise<OpenSeaAsset> {
+    if (!this.makeGetRequest) {
+      throw new Error("No make get request");
+    }
     let json;
     try {
-      json = await this.get(
-        `${API_PATH}/asset/${tokenAddress}/${tokenId || 0}/`
+      json = await this.makeGetRequest<OpenSeaAsset>(
+        `https://api.opensea.io${API_PATH}/asset/${tokenAddress}/${
+          tokenId || 0
+        }/`
       );
     } catch (error) {
       // @ts-ignore
@@ -237,7 +248,7 @@ export class OpenSeaAPI {
       return this.getAsset({ tokenAddress, tokenId }, retries - 1);
     }
 
-    return assetFromJSON(json);
+    return assetFromJSON(json.data);
   }
 
   /**
@@ -461,6 +472,8 @@ export class OpenSeaAPI {
         errorMessage = `Message: ${JSON.stringify(result)}`;
         break;
     }
+
+    console.log("ERROR", response.status, response.url);
 
     throw new Error(
       `API Error ${response.status}: ${errorMessage} | Url: ${response.url}`

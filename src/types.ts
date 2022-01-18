@@ -103,6 +103,7 @@ export interface OpenSeaAPIConfig {
     path: string,
     data: object
   ) => Promise<AxiosResponse<T>>;
+  makeGetRequest?: <T>(path: string) => Promise<AxiosResponse<T>>;
 }
 
 /**
