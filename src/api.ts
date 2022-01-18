@@ -462,7 +462,9 @@ export class OpenSeaAPI {
         break;
     }
 
-    throw new Error(`API Error ${response.status}: ${errorMessage}`);
+    throw new Error(
+      `API Error ${response.status}: ${errorMessage} | Url: ${response.url}`
+    );
   }
 }
 
