@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import "isomorphic-unfetch";
 import _ from "lodash";
 import * as QueryString from "query-string";
@@ -50,15 +51,30 @@ export class OpenSeaAPI {
    */
   public logger: (arg: string) => void;
 
-  private apiKey: string | undefined;
-
+  private apiKey: string | undefined | (() => string);
   /**
    * Create an instance of the OpenSea API
    * @param config OpenSeaAPIConfig for setting up the API, including an optional API key, network name, and base URL
    * @param logger Optional function for logging debug strings before and after requests are made
    */
+
+  private makePostRequest?: <T>(
+    path: string,
+    data: object
+  ) => Promise<AxiosResponse<T>>;
+
+  private makeGetRequest?: <T>(path: string) => Promise<AxiosResponse<T>>;
+
   constructor(config: OpenSeaAPIConfig, logger?: (arg: string) => void) {
     this.apiKey = config.apiKey;
+
+    if (config.makePostRequest) {
+      this.makePostRequest = config.makePostRequest;
+    }
+
+    if (config.makeGetRequest) {
+      this.makeGetRequest = config.makeGetRequest;
+    }
 
     switch (config.networkName) {
       case Network.Rinkeby:
@@ -84,18 +100,22 @@ export class OpenSeaAPI {
    * @param retries Number of times to retry if the service is unavailable for any reason
    */
   public async postOrder(order: OrderJSON, retries = 2): Promise<Order> {
+    if (!this.makePostRequest) {
+      throw new Error("didn't pass a makePostRequest function");
+    }
+
     let json;
     try {
-      json = (await this.post(
-        `${ORDERBOOK_PATH}/orders/post/`,
+      json = await this.makePostRequest<Order>(
+        `https://api.opensea.io/wyvern/v1/orders/post/`,
         order
-      )) as OrderJSON;
+      );
     } catch (error) {
       _throwOrContinue(error, retries);
       await delay(3000);
       return this.postOrder(order, retries - 1);
     }
-    return orderFromJSON(json);
+    return json.data;
   }
 
   /**
@@ -211,10 +231,16 @@ export class OpenSeaAPI {
     },
     retries = 1
   ): Promise<OpenSeaAsset> {
+    if (!this.makeGetRequest) {
+      throw new Error("No make get request");
+    }
     let json;
+
     try {
-      json = await this.get(
-        `${API_PATH}/asset/${tokenAddress}/${tokenId || 0}/`
+      json = await this.makeGetRequest<OpenSeaAsset>(
+        `https://api.opensea.io${API_PATH}/asset/${tokenAddress}/${
+          tokenId || 0
+        }/`
       );
     } catch (error) {
       _throwOrContinue(error, retries);
@@ -222,7 +248,7 @@ export class OpenSeaAPI {
       return this.getAsset({ tokenAddress, tokenId }, retries - 1);
     }
 
-    return assetFromJSON(json);
+    return assetFromJSON(json.data);
   }
 
   /**
@@ -379,7 +405,8 @@ export class OpenSeaAPI {
    */
   private async _fetch(apiPath: string, opts: RequestInit = {}) {
     const apiBase = this.apiBaseUrl;
-    const apiKey = this.apiKey;
+    const apiKey =
+      typeof this.apiKey === "function" ? this.apiKey() : this.apiKey;
     const finalUrl = apiBase + apiPath;
     const finalOpts = {
       ...opts,

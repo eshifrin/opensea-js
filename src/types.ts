@@ -1,4 +1,5 @@
 /* eslint-disable import/no-unused-modules */
+import { AxiosResponse } from "axios";
 import BigNumber from "bignumber.js";
 import * as Web3 from "web3";
 import {
@@ -95,12 +96,16 @@ export interface EventData {
  */
 export interface OpenSeaAPIConfig {
   networkName?: Network;
-  apiKey?: string;
+  apiKey?: string | (() => string);
   apiBaseUrl?: string;
   useReadOnlyProvider?: boolean;
   // Sent to WyvernJS
   gasPrice?: BigNumber;
-
+  makePostRequest?: <T>(
+    path: string,
+    data: object
+  ) => Promise<AxiosResponse<T>>;
+  makeGetRequest?: <T>(path: string) => Promise<AxiosResponse<T>>;
   wyvernConfig?: WyvernConfig;
 }
 
