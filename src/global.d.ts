@@ -16,7 +16,7 @@ declare module "*.json" {
   /* tslint:enable */
 }
 
-declare module "ethereumjs-abi" {
+declare module "ethereumjsabi" {
   const soliditySHA3: (argTypes: string[], args: unknown[]) => Buffer;
   const methodID: (name: string, types: string[]) => Buffer;
   const rawEncode: (argTypes: string[], args: unknown[]) => Buffer;

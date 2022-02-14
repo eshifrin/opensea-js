@@ -63,8 +63,13 @@ typings/
 # next.js build output
 .next
 
-lib
-
 docs
 
 .DS_Store
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
