@@ -4326,7 +4326,7 @@ export class OpenSeaPort {
         salt: order.salt.toString(),
       };
 
-      const message = JSON.stringify({
+      const message = {
         types: EIP_712_ORDER_TYPES,
         domain: {
           name: EIP_712_WYVERN_DOMAIN_NAME,
@@ -4336,7 +4336,7 @@ export class OpenSeaPort {
         },
         primaryType: "Order",
         message: { ...orderForSigning, nonce: signerOrderNonce.toNumber() },
-      });
+      };
 
       const ecSignature = await signTypedDataAsync(
         this.web3,
