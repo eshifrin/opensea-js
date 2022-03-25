@@ -107,7 +107,7 @@ export class OpenSeaAPI {
     let json;
     try {
       json = await this.makePostRequest<Order>(
-        `https://api.opensea.io/wyvern/v1/orders/post/`,
+        `${this.apiBaseUrl}/wyvern/v1/orders/post/`,
         order
       );
     } catch (error) {
@@ -238,9 +238,7 @@ export class OpenSeaAPI {
 
     try {
       json = await this.makeGetRequest<OpenSeaAsset>(
-        `https://api.opensea.io${API_PATH}/asset/${tokenAddress}/${
-          tokenId || 0
-        }/`
+        `${this.apiBaseUrl}${API_PATH}/asset/${tokenAddress}/${tokenId || 0}/`
       );
     } catch (error) {
       _throwOrContinue(error, retries);
