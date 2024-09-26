@@ -30,6 +30,7 @@ import {
   SITE_HOST_MAINNET,
   SITE_HOST_RINKEBY
 } from './constants'
+import { AxiosResponse } from 'axios'
 
 export class OpenSeaAPI {
 
@@ -52,6 +53,8 @@ export class OpenSeaAPI {
 
   private apiKey: string | undefined
 
+  private makePostRequest?: <T>(path: string, data: object) => Promise<AxiosResponse<T>>
+
   /**
    * Create an instance of the OpenSea API
    * @param config OpenSeaAPIConfig for setting up the API, including an optional API key, network name, and base URL
@@ -59,6 +62,9 @@ export class OpenSeaAPI {
    */
   constructor(config: OpenSeaAPIConfig, logger?: (arg: string) => void) {
     this.apiKey = config.apiKey
+    if (config.makePostRequest) {
+      this.makePostRequest = config.makePostRequest
+    }
 
     switch (config.networkName) {
       case Network.Rinkeby:
@@ -83,16 +89,31 @@ export class OpenSeaAPI {
    * @param order Order JSON to post to the orderbook
    * @param retries Number of times to retry if the service is unavailable for any reason
    */
-  public async postOrder(order: OrderJSON, retries = 2): Promise<Order> {
+  public async postOrderOld(order: OrderJSON, retries = 0): Promise<Order> {
     let json
     try {
       json = await this.post(`${ORDERBOOK_PATH}/orders/post/`, order) as OrderJSON
     } catch (error) {
       _throwOrContinue(error, retries)
       await delay(3000)
-      return this.postOrder(order, retries - 1)
+      return this.postOrderOld(order, retries - 1)
     }
     return orderFromJSON(json)
+  }
+
+  public async postOrder(order: OrderJSON, retries = 0): Promise<Order> {
+    if (!this.makePostRequest) {
+      throw new Error("didn't pass a makePostRequest function")
+    }
+
+    let json
+    try {
+      // TODO: change to allow for requests against testnet
+      json = await this.makePostRequest<Order>(`https://api.opensea.io/wyvern/v1/orders/post/`, order)
+    } catch (error) {
+      throw error
+    }
+    return json.data
   }
 
   /**
